@@ -49,7 +49,7 @@ namespace UnitTests {
                 <add name='added' type='double' t='cs(number1+number2)' />
                 <add name='joined' t='cs(text1+text2)' />
                 <add name='if' t='cs(
-                    if(text1==""Two"" || text2=""Two"" || number1==2 || number2==2.0){{ 
+                    if(text1==""Two"" || text2==""Two"" || number1==2 || number2==2.0){{ 
                         return ""It is Two"";
                     }} else {{ 
                         return ""It is not Two"";
@@ -67,7 +67,7 @@ namespace UnitTests {
 
                     var added = cf.First(f => f.Name == "added");
                     var joined = cf.First(f => f.Name == "joined");
-                    var ifStatement = cf.First(f => f.Name == "if");
+                    var @if = cf.First(f => f.Name == "if");
                     
                     var controller = inner.Resolve<IProcessController>();
                     var rows = controller.Read().ToArray();
@@ -76,7 +76,13 @@ namespace UnitTests {
                     Assert.AreEqual(4.0, rows[1][added]);
                     Assert.AreEqual(6.0, rows[2][added]);
 
-                    
+                    Assert.AreEqual("OneOne", rows[0][joined]);
+                    Assert.AreEqual("TwoTwo", rows[1][joined]);
+                    Assert.AreEqual("ThreeThree", rows[2][joined]);
+
+                    Assert.AreEqual("It is not Two", rows[0][@if]);
+                    Assert.AreEqual("It is Two", rows[1][@if]);
+                    Assert.AreEqual("It is not Two", rows[2][@if]);
                 }
             }
 

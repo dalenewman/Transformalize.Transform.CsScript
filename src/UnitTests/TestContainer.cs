@@ -42,12 +42,7 @@ namespace UnitTests {
 
             builder.Register((ctx) => process).As<Process>();
             builder.RegisterInstance(logger).As<IPipelineLogger>().SingleInstance();
-            builder.RegisterModule(new CsScriptModule());
-
-            // CsScript Actions
-            //foreach (var action in process.Actions.Where(a => a.Type == "humanize-labels" && a.GetModes().Any(m => m == process.Mode || m == "*"))) {
-            //    builder.Register(ctx => new HumanizeLabels(new PipelineContext(logger, process), action)).Named<IAction>(action.Key);
-            //}
+            builder.RegisterModule(new CsScriptModule(setup:false));
 
             // Process Context
             builder.Register<IContext>((ctx, p) => new PipelineContext(logger, process)).As<IContext>();

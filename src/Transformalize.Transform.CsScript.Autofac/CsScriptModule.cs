@@ -11,16 +11,24 @@ using Parameter = Cfg.Net.Shorthand.Parameter;
 
 namespace Transformalize.Transforms.CsScript.Autofac {
     public class CsScriptModule : Module {
+        private readonly bool _setup;
 
         private HashSet<string> _methods;
         private ShorthandRoot _shortHand;
+
+        public CsScriptModule(bool setup) {
+            _setup = setup;
+        }
         protected override void Load(ContainerBuilder builder) {
 
-            CSScript.EvaluatorConfig.Engine = EvaluatorEngine.CodeDom;
-            // CSScript.EvaluatorConfig.Access = EvaluatorAccess.Singleton;
-            CSScript.EvaluatorConfig.RefernceDomainAsemblies = true;
-            CSScript.GlobalSettings.SearchDirs = AssemblyDirectory + ";" + Path.Combine(AssemblyDirectory, "plugins");
-            CSSEnvironment.SetScriptTempDir(AssemblyDirectory);
+            if (_setup) {
+                CSScript.EvaluatorConfig.Engine = EvaluatorEngine.CodeDom;
+                CSScript.EvaluatorConfig.RefernceDomainAsemblies = true;
+                CSScript.GlobalSettings.SearchDirs = AssemblyDirectory + ";" + Path.Combine(AssemblyDirectory, "plugins");
+                CSScript.AssemblyResolvingEnabled = true;
+                CSScript.CacheEnabled = true;
+                CSSEnvironment.SetScriptTempDir(AssemblyDirectory);
+            }
 
             // get methods and shorthand from builder
             _methods = builder.Properties.ContainsKey("Methods") ? (HashSet<string>)builder.Properties["Methods"] : new HashSet<string>();

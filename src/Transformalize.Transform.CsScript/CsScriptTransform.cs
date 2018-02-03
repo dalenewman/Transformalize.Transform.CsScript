@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 using csscript;
 using CSScriptLibrary;
@@ -7,7 +8,7 @@ using Transformalize.Extensions;
 
 namespace Transformalize.Transforms.CsScript {
 
-    public interface ICsScriptTransform {
+    public interface ICsScriptTransform : ISerializable {
         object Transform(object[] rowData);
     }
 
@@ -41,8 +42,13 @@ namespace Transformalize.Transforms.CsScript {
             var code = new StringBuilder();
 
             code.AppendLine("using Transformalize.Transforms.CsScript;");
+            code.AppendLine("using System;");
+            code.AppendLine("using System.Runtime.Serialization;");
             code.AppendLine();
+            code.AppendLine("[Serializable]");
             code.AppendLine("public class " + Utility.GetMethodName(Context) + " : ICsScriptTransform {");
+            code.AppendLine();
+            code.AppendLine("  public void GetObjectData(SerializationInfo info, StreamingContext context){}");
             code.AppendLine();
             code.AppendLine("  public object Transform(object[] row){");
 
@@ -54,13 +60,13 @@ namespace Transformalize.Transforms.CsScript {
             }
 
             code.AppendLine();
-            code.AppendLine("    " +Context.Operation.Script);
+            code.AppendLine("    " + Context.Operation.Script);
             code.AppendLine("  }");
             code.AppendLine("}");
             var expanded = code.ToString();
 
             try {
-                CSScript.AssemblyResolvingEnabled = true;
+                // _transform = CSScript.Evaluator.LoadCodeRemotely<ICsScriptTransform>(expanded);
                 _transform = CSScript.Evaluator.LoadCode<ICsScriptTransform>(expanded);
             } catch (CompilerException e) {
                 Run = false;
@@ -75,6 +81,11 @@ namespace Transformalize.Transforms.CsScript {
         public override IRow Operate(IRow row) {
             row[Context.Field] = _transform.Transform(row.ToArray());
             return row;
+        }
+
+        public override void Dispose() {
+            base.Dispose();
+            _transform?.UnloadOwnerDomain();
         }
 
         public static string ToSystemTypeName(string typeIn) {
@@ -107,6 +118,7 @@ namespace Transformalize.Transforms.CsScript {
                 }
             };
         }
+
 
     }
 

@@ -33,7 +33,7 @@ namespace UnitTests {
             builder.Properties["ShortHand"] = _shortHand;
             builder.Properties["Methods"] = _methods;
 
-            builder.RegisterModule(new CsScriptModule());
+            builder.RegisterModule(new CsScriptModule(setup:true));
             builder.Register((c, p) => _shortHand).As<ShorthandRoot>().InstancePerLifetimeScope();
 
             builder.Register(ctx=> new Process(cfg, new ShorthandCustomizer(ctx.Resolve<ShorthandRoot>(), new[] {"fields", "calculated-fields"}, "t", "transforms", "method"))).As<Process>().InstancePerDependency();  // because it has state, if you run it again, it's not so good
