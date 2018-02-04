@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Autofac;
 using csscript;
 using Cfg.Net.Shorthand;
@@ -11,60 +12,64 @@ using Parameter = Cfg.Net.Shorthand.Parameter;
 
 namespace Transformalize.Transforms.CsScript.Autofac {
     public class CsScriptModule : Module {
-        private readonly bool _setup;
+        private static bool _setup;
 
         private HashSet<string> _methods;
         private ShorthandRoot _shortHand;
 
-        public CsScriptModule(bool setup) {
-            _setup = setup;
-        }
         protected override void Load(ContainerBuilder builder) {
 
-            if (_setup) {
+            var signatures = new CsScriptTransform().GetSignatures().ToArray();
+
+            if (!_setup) {
                 CSScript.EvaluatorConfig.Engine = EvaluatorEngine.CodeDom;
                 CSScript.EvaluatorConfig.RefernceDomainAsemblies = true;
                 CSScript.GlobalSettings.SearchDirs = AssemblyDirectory + ";" + Path.Combine(AssemblyDirectory, "plugins");
                 CSScript.AssemblyResolvingEnabled = true;
                 CSScript.CacheEnabled = true;
                 CSSEnvironment.SetScriptTempDir(AssemblyDirectory);
+
+                // get methods and shorthand from builder
+                _methods = builder.Properties.ContainsKey("Methods") ? (HashSet<string>)builder.Properties["Methods"] : new HashSet<string>();
+                _shortHand = builder.Properties.ContainsKey("ShortHand") ? (ShorthandRoot)builder.Properties["ShortHand"] : new ShorthandRoot();
+                RegisterShortHand(signatures);
+
+                _setup = true;
+            } else {
+                RegisterTransform(builder, c => new CsScriptTransform(c), signatures);
             }
-
-            // get methods and shorthand from builder
-            _methods = builder.Properties.ContainsKey("Methods") ? (HashSet<string>)builder.Properties["Methods"] : new HashSet<string>();
-            _shortHand = builder.Properties.ContainsKey("ShortHand") ? (ShorthandRoot)builder.Properties["ShortHand"] : new ShorthandRoot();
-
-            // CsScript Transforms
-            RegisterTransform(builder, c => new CsScriptTransform(c), new CsScriptTransform().GetSignatures());
-
         }
 
 
-        private void RegisterTransform(ContainerBuilder builder, Func<IContext, ITransform> getTransform, IEnumerable<OperationSignature> signatures) {
+        private void RegisterShortHand(IEnumerable<OperationSignature> signatures) {
 
             foreach (var s in signatures) {
-                if (_methods.Add(s.Method)) {
-
-                    var method = new Method { Name = s.Method, Signature = s.Method, Ignore = s.Ignore };
-                    _shortHand.Methods.Add(method);
-
-                    var signature = new Signature {
-                        Name = s.Method,
-                        NamedParameterIndicator = s.NamedParameterIndicator
-                    };
-
-                    foreach (var parameter in s.Parameters) {
-                        signature.Parameters.Add(new Parameter {
-                            Name = parameter.Name,
-                            Value = parameter.Value
-                        });
-                    }
-                    _shortHand.Signatures.Add(signature);
+                if (!_methods.Add(s.Method)) {
+                    continue;
                 }
+                
+                var method = new Method { Name = s.Method, Signature = s.Method, Ignore = s.Ignore };
+                _shortHand.Methods.Add(method);
 
+                var signature = new Signature {
+                    Name = s.Method,
+                    NamedParameterIndicator = s.NamedParameterIndicator
+                };
+
+                foreach (var parameter in s.Parameters) {
+                    signature.Parameters.Add(new Parameter {
+                        Name = parameter.Name,
+                        Value = parameter.Value
+                    });
+                }
+                _shortHand.Signatures.Add(signature);
+            }
+        }
+
+        private void RegisterTransform(ContainerBuilder builder, Func<IContext, ITransform> getTransform, IEnumerable<OperationSignature> signatures) {
+            foreach (var s in signatures) {
                 builder.Register((c, p) => getTransform(p.Positional<IContext>(0))).Named<ITransform>(s.Method);
             }
-
         }
 
         public static string AssemblyDirectory {

@@ -1,17 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Runtime.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using csscript;
 using CSScriptLibrary;
+using Transformalize.Configuration;
 using Transformalize.Contracts;
 using Transformalize.Extensions;
 
 namespace Transformalize.Transforms.CsScript {
-
-    public interface ICsScriptTransform : ISerializable {
-        object Transform(object[] rowData);
-    }
-
     public class CsScriptTransform : BaseTransform {
         /*
          * Note: Caching (as well as debugging) is only compatible with CodeDOM
@@ -19,6 +16,7 @@ namespace Transformalize.Transforms.CsScript {
          * Thus caching will be effectively disabled for both CSScript.MonoEvaluator.* and CSScript.RoslynEvaluator.*.
          */
         private readonly ICsScriptTransform _transform;
+        private MethodDelegate<object> _delegate;
         public CsScriptTransform(IContext context = null) : base(context, "object") {
             if (IsMissingContext()) {
                 return;
@@ -39,53 +37,85 @@ namespace Transformalize.Transforms.CsScript {
             }
 
             var fields = Context.Entity.GetFieldMatches(Context.Operation.Script);
-            var code = new StringBuilder();
+            var cb = new StringBuilder();
 
-            code.AppendLine("using Transformalize.Transforms.CsScript;");
-            code.AppendLine("using System;");
-            code.AppendLine("using System.Runtime.Serialization;");
-            code.AppendLine();
-            code.AppendLine("[Serializable]");
-            code.AppendLine("public class " + Utility.GetMethodName(Context) + " : ICsScriptTransform {");
-            code.AppendLine();
-            code.AppendLine("  public void GetObjectData(SerializationInfo info, StreamingContext context){}");
-            code.AppendLine();
-            code.AppendLine("  public object Transform(object[] row){");
+            var methodName = Utility.GetMethodName(Context);
+            if (char.IsLower(methodName[0])) {
+                methodName = char.ToUpper(methodName[0]) + methodName.Substring(1);
+            }
+
+            if (!Context.Field.Remote) {
+                cb.AppendLine("using Transformalize.Transforms.CsScript;");
+                cb.AppendLine("using System;");
+                cb.AppendLine();
+                cb.AppendLine("public class " + methodName + " : ICsScriptTransform {");
+                cb.AppendLine();
+            }
+
+            cb.AppendLine("  public object Transform(object[] row){");
 
             foreach (var field in fields) {
                 var type = ToSystemTypeName(field.Type);
                 var name = Protection.KeyWords.Contains(Utility.Identifier(field.Alias)) ? "@" + Utility.Identifier(field.Alias) : Utility.Identifier(field.Alias);
                 var index = Context.Entity.IsMaster ? field.MasterIndex : field.Index;
-                code.AppendLine($"    {type} {name} = ({type}) row[{index}];");
+                cb.AppendLine($"    {type} {name} = ({type}) row[{index}];");
             }
 
-            code.AppendLine();
-            code.AppendLine("    " + Context.Operation.Script);
-            code.AppendLine("  }");
-            code.AppendLine("}");
-            var expanded = code.ToString();
+            cb.AppendLine();
+            cb.AppendLine("    " + Context.Operation.Script);
+            cb.AppendLine("  }");
+            if (!Context.Field.Remote) {
+                cb.AppendLine("}");
+            }
+
+            var code = cb.ToString();
 
             try {
-                // _transform = CSScript.Evaluator.LoadCodeRemotely<ICsScriptTransform>(expanded);
-                _transform = CSScript.Evaluator.LoadCode<ICsScriptTransform>(expanded);
+                if (Context.Field.Remote) {
+                    _delegate = CSScript.Evaluator.CreateDelegateRemotely<object>(code);
+                } else {
+                    _transform = CSScript.Evaluator.LoadCode<ICsScriptTransform>(code);
+                }
+
             } catch (CompilerException e) {
                 Run = false;
                 Context.Error(e.Message);
-                Context.Error(expanded.Replace("{", "{{").Replace("}", "}}"));
+                Context.Error(code.Replace("{", "{{").Replace("}", "}}"));
                 return;
             }
 
-            Context.Debug(() => $"Code for {Context.Field.Alias} is:/r/n {expanded.Replace("{", "{{").Replace("}", "}}")}");
+            Context.Debug(() => $"Code for {Context.Field.Alias} is:/r/n {code.Replace("{", "{{").Replace("}", "}}")}");
         }
 
         public override IRow Operate(IRow row) {
-            row[Context.Field] = _transform.Transform(row.ToArray());
-            return row;
+            throw new NotImplementedException("This is not called because Operate over rows is implemented!");
+        }
+
+        public override IEnumerable<IRow> Operate(IEnumerable<IRow> rows) {
+            if (Context.Field.Remote) {
+                foreach (var row in rows) {
+                    row[Context.Field] = _delegate(new object[] { row.ToArray() });
+                    yield return row;
+                }
+            } else {
+                foreach (var row in rows) {
+                    row[Context.Field] = _transform.Transform(row.ToArray());
+                    yield return row;
+                }
+            }
         }
 
         public override void Dispose() {
             base.Dispose();
-            _transform?.UnloadOwnerDomain();
+            if (Context.Field.Remote) {
+                if (_delegate == null) {
+                    return;
+                } else {
+                    _delegate?.UnloadOwnerDomain();
+                    _delegate = null;
+                }
+
+            }
         }
 
         public static string ToSystemTypeName(string typeIn) {
@@ -119,6 +149,15 @@ namespace Transformalize.Transforms.CsScript {
             };
         }
 
+
+        public static string AssemblyDirectory {
+            get {
+                var codeBase = typeof(Process).Assembly.CodeBase;
+                var uri = new UriBuilder(codeBase);
+                var path = Uri.UnescapeDataString(uri.Path);
+                return Path.GetDirectoryName(path);
+            }
+        }
 
     }
 

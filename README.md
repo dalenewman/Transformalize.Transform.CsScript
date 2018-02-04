@@ -1,4 +1,4 @@
-This adds C# transform to Transformalize using [CS-Script](https://github.com/oleg-shilo/cs-script).  It is a plug-in compatible with Transformalize 0.3.0-beta.
+This adds C# transform to Transformalize using [CS-Script](https://github.com/oleg-shilo/cs-script).  It is a plug-in compatible with Transformalize 0.3.1-beta.
 
 Build the Autofac project and put it's output into Transformalize's *plugins* folder.
 
@@ -24,3 +24,6 @@ Use like this:
 ```
 
 This would produce `Something Wonderful 2`
+
+Note: You can set a `remote` attribute on the field to `true` if you want to avoid memory leaks associated 
+with running dyanamically loaded c# assemblies into the host's `AppDomain`.

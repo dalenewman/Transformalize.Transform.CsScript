@@ -42,7 +42,7 @@ namespace UnitTests {
 
             builder.Register((ctx) => process).As<Process>();
             builder.RegisterInstance(logger).As<IPipelineLogger>().SingleInstance();
-            builder.RegisterModule(new CsScriptModule(setup:false));
+            builder.RegisterModule(new CsScriptModule());
 
             // Process Context
             builder.Register<IContext>((ctx, p) => new PipelineContext(logger, process)).As<IContext>();

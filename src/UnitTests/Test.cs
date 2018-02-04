@@ -25,7 +25,7 @@ using Transformalize.Contracts;
 namespace UnitTests {
 
     [TestClass]
-    public class CsScriptTester {
+    public class Test {
 
         [TestMethod]
         public void BasicTests() {
@@ -47,7 +47,7 @@ namespace UnitTests {
             </fields>
             <calculated-fields>
                 <add name='added' type='double' t='cs(number1+number2)' />
-                <add name='joined' t='cs(text1+text2)' />
+                <add name='joined' remote='true' t='cs(text1+text2)' />
                 <add name='if' t='cs(
                     if(text1==""Two"" || text2==""Two"" || number1==2 || number2==2.0){{ 
                         return ""It is Two"";
