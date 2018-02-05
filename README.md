@@ -1,3 +1,7 @@
+**WARNING**: This is a work in progress.  It leaks more memory than the old CSharp provider.  Don't use.
+
+---
+
 This adds C# transform to Transformalize using [CS-Script](https://github.com/oleg-shilo/cs-script).  It is a plug-in compatible with Transformalize 0.3.1-beta.
 
 Build the Autofac project and put it's output into Transformalize's *plugins* folder.

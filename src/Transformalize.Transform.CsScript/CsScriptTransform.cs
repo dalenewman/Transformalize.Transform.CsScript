@@ -10,13 +10,13 @@ using Transformalize.Extensions;
 
 namespace Transformalize.Transforms.CsScript {
     public class CsScriptTransform : BaseTransform {
-        /*
-         * Note: Caching (as well as debugging) is only compatible with CodeDOM
-         * compiler engine: calls CSSCript.Load*, CSScript.Compile.* and CSScript.CodeDomEvaluator.*).
-         * Thus caching will be effectively disabled for both CSScript.MonoEvaluator.* and CSScript.RoslynEvaluator.*.
-         */
-        private readonly ICsScriptTransform _transform;
-        private MethodDelegate<object> _delegate;
+
+        private static readonly Dictionary<string, ICsScriptTransform> LocalCache = new Dictionary<string, ICsScriptTransform>();
+        private static readonly Dictionary<string, MethodDelegate<object>> RemoteCache = new Dictionary<string, MethodDelegate<object>>();
+
+        private readonly ICsScriptTransform _local;
+        private readonly MethodDelegate<object> _remote;
+
         public CsScriptTransform(IContext context = null) : base(context, "object") {
             if (IsMissingContext()) {
                 return;
@@ -70,21 +70,33 @@ namespace Transformalize.Transforms.CsScript {
 
             var code = cb.ToString();
 
+            if (LocalCache.ContainsKey(code) && LocalCache[code] != null) {
+                _local = LocalCache[code];
+                Context.Warn("Using cached local code");
+                return;
+            }
+
+            if (RemoteCache.ContainsKey(code) && RemoteCache[code] != null) {
+                _remote = RemoteCache[code];
+                Context.Warn("Using cached remote code");
+                return;
+            }
+
             try {
                 if (Context.Field.Remote) {
-                    _delegate = CSScript.Evaluator.CreateDelegateRemotely<object>(code);
+                    _remote = CSScript.Evaluator.CreateDelegateRemotely<object>(code);
+                    RemoteCache[code] = _remote;
                 } else {
-                    _transform = CSScript.Evaluator.LoadCode<ICsScriptTransform>(code);
+                    _local = CSScript.Evaluator.LoadCode<ICsScriptTransform>(code);
+                    LocalCache[code] = _local;
                 }
 
             } catch (CompilerException e) {
                 Run = false;
                 Context.Error(e.Message);
                 Context.Error(code.Replace("{", "{{").Replace("}", "}}"));
-                return;
             }
 
-            Context.Debug(() => $"Code for {Context.Field.Alias} is:/r/n {code.Replace("{", "{{").Replace("}", "}}")}");
         }
 
         public override IRow Operate(IRow row) {
@@ -94,27 +106,14 @@ namespace Transformalize.Transforms.CsScript {
         public override IEnumerable<IRow> Operate(IEnumerable<IRow> rows) {
             if (Context.Field.Remote) {
                 foreach (var row in rows) {
-                    row[Context.Field] = _delegate(new object[] { row.ToArray() });
+                    row[Context.Field] = _remote(new object[] { row.ToArray() });
                     yield return row;
                 }
             } else {
                 foreach (var row in rows) {
-                    row[Context.Field] = _transform.Transform(row.ToArray());
+                    row[Context.Field] = _local.Transform(row.ToArray());
                     yield return row;
                 }
-            }
-        }
-
-        public override void Dispose() {
-            base.Dispose();
-            if (Context.Field.Remote) {
-                if (_delegate == null) {
-                    return;
-                } else {
-                    _delegate?.UnloadOwnerDomain();
-                    _delegate = null;
-                }
-
             }
         }
 

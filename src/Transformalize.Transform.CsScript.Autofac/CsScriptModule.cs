@@ -27,17 +27,16 @@ namespace Transformalize.Transforms.CsScript.Autofac {
                 CSScript.GlobalSettings.SearchDirs = AssemblyDirectory + ";" + Path.Combine(AssemblyDirectory, "plugins");
                 CSScript.AssemblyResolvingEnabled = true;
                 CSScript.CacheEnabled = true;
-                CSSEnvironment.SetScriptTempDir(AssemblyDirectory);
-
-                // get methods and shorthand from builder
-                _methods = builder.Properties.ContainsKey("Methods") ? (HashSet<string>)builder.Properties["Methods"] : new HashSet<string>();
-                _shortHand = builder.Properties.ContainsKey("ShortHand") ? (ShorthandRoot)builder.Properties["ShortHand"] : new ShorthandRoot();
-                RegisterShortHand(signatures);
+                CSSEnvironment.SetScriptTempDir(Path.Combine(AssemblyDirectory, "plugins", "cs-script"));
 
                 _setup = true;
-            } else {
-                RegisterTransform(builder, c => new CsScriptTransform(c), signatures);
             }
+
+            // get methods and shorthand from builder
+            _methods = builder.Properties.ContainsKey("Methods") ? (HashSet<string>)builder.Properties["Methods"] : new HashSet<string>();
+            _shortHand = builder.Properties.ContainsKey("ShortHand") ? (ShorthandRoot)builder.Properties["ShortHand"] : new ShorthandRoot();
+            RegisterShortHand(signatures);
+            RegisterTransform(builder, c => new CsScriptTransform(c), signatures);
         }
 
 
@@ -47,7 +46,7 @@ namespace Transformalize.Transforms.CsScript.Autofac {
                 if (!_methods.Add(s.Method)) {
                     continue;
                 }
-                
+
                 var method = new Method { Name = s.Method, Signature = s.Method, Ignore = s.Ignore };
                 _shortHand.Methods.Add(method);
 
