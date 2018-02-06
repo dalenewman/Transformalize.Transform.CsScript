@@ -45,10 +45,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CsScriptTransform.cs" />
-    <Compile Include="ICsScriptTransform.cs" />
+    <Compile Include="CodeCommon.cs" />
     <Compile Include="KeyWords.cs" />
+    <Compile Include="CodeLocal.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CodeRemote.cs" />
+    <Compile Include="RemoteUnLoad.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -19,9 +19,10 @@ namespace Transformalize.Transforms.CsScript.Autofac {
 
         protected override void Load(ContainerBuilder builder) {
 
-            var signatures = new CsScriptTransform().GetSignatures().ToArray();
+            var signatures = new CodeLocal().GetSignatures().ToArray();
 
             if (!_setup) {
+                CSScript.EvaluatorConfig.Access = EvaluatorAccess.Singleton;
                 CSScript.EvaluatorConfig.Engine = EvaluatorEngine.CodeDom;
                 CSScript.EvaluatorConfig.RefernceDomainAsemblies = true;
                 CSScript.GlobalSettings.SearchDirs = AssemblyDirectory + ";" + Path.Combine(AssemblyDirectory, "plugins");
@@ -35,8 +36,17 @@ namespace Transformalize.Transforms.CsScript.Autofac {
             // get methods and shorthand from builder
             _methods = builder.Properties.ContainsKey("Methods") ? (HashSet<string>)builder.Properties["Methods"] : new HashSet<string>();
             _shortHand = builder.Properties.ContainsKey("ShortHand") ? (ShorthandRoot)builder.Properties["ShortHand"] : new ShorthandRoot();
+
             RegisterShortHand(signatures);
-            RegisterTransform(builder, c => new CsScriptTransform(c), signatures);
+            RegisterTransform(builder, c => c.Field.Remote ? (ITransform)new CodeRemote(c) : new CodeLocal(c), signatures);
+            var action = new Configuration.Action { Type = "cs-script", Before = false, After = true, Key = "cs-script" };
+
+            builder.Register<IAction>((c) => new RemoteUnload(action)).Named<IAction>("cs-script");
+
+            if (builder.Properties.ContainsKey("Process")) {
+                var process = (Process)builder.Properties["Process"];
+                process.Actions.Add(action);
+            }
         }
 
 
@@ -65,7 +75,7 @@ namespace Transformalize.Transforms.CsScript.Autofac {
             }
         }
 
-        private void RegisterTransform(ContainerBuilder builder, Func<IContext, ITransform> getTransform, IEnumerable<OperationSignature> signatures) {
+        private static void RegisterTransform(ContainerBuilder builder, Func<IContext, ITransform> getTransform, IEnumerable<OperationSignature> signatures) {
             foreach (var s in signatures) {
                 builder.Register((c, p) => getTransform(p.Positional<IContext>(0))).Named<ITransform>(s.Method);
             }

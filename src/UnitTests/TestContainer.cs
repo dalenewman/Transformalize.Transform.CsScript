@@ -16,15 +16,18 @@
 // limitations under the License.
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
+using Transformalize;
 using Transformalize.Context;
 using Transformalize.Contracts;
 using Transformalize.Impl;
-using Transformalize.Logging;
 using Transformalize.Nulls;
 using Transformalize.Provider.Internal;
+using Transformalize.Providers.Console;
+using Transformalize.Transforms;
 using Transformalize.Transforms.CsScript.Autofac;
 using Transformalize.Transforms.System;
 using Process = Transformalize.Configuration.Process;
@@ -34,15 +37,17 @@ namespace UnitTests {
 
         public ILifetimeScope CreateScope(ILifetimeScope scope) {
 
-            var logger = new DebugLogger(LogLevel.Debug);
+            var logger = new ConsoleLogger();
 
             var process = scope.Resolve<Process>();
 
             var builder = new ContainerBuilder();
+            builder.Properties["Process"] = process;
 
             builder.Register((ctx) => process).As<Process>();
             builder.RegisterInstance(logger).As<IPipelineLogger>().SingleInstance();
             builder.RegisterModule(new CsScriptModule());
+            RegisterTransform(builder, c => new HashcodeTransform(c), new[] { new OperationSignature("hashcode") });
 
             // Process Context
             builder.Register<IContext>((ctx, p) => new PipelineContext(logger, process)).As<IContext>();
@@ -135,6 +140,7 @@ namespace UnitTests {
                     }
 
                     pipeline.Register(new IncrementTransform(context));
+                    pipeline.Register(new LogTransform(context));
                     pipeline.Register(new DefaultTransform(context, context.GetAllEntityFields().Where(f => !f.System)));
                     pipeline.Register(TransformFactory.GetTransforms(ctx, context, entity.GetAllFields().Where(f => f.Transforms.Any())));
 
@@ -180,6 +186,7 @@ namespace UnitTests {
 
                 // register transforms
                 pipeline.Register(new IncrementTransform(context));
+                pipeline.Register(new LogTransform(context));
                 pipeline.Register(new DefaultTransform(new PipelineContext(ctx.Resolve<IPipelineLogger>(), calc, entity), entity.CalculatedFields));
                 pipeline.Register(TransformFactory.GetTransforms(ctx, context, entity.CalculatedFields));
                 pipeline.Register(new StringTruncateTransfom(new PipelineContext(ctx.Resolve<IPipelineLogger>(), calc, entity)));
@@ -230,6 +237,12 @@ namespace UnitTests {
 
             return builder.Build().BeginLifetimeScope();
 
+        }
+
+        private static void RegisterTransform(ContainerBuilder builder, Func<IContext, ITransform> getTransform, IEnumerable<OperationSignature> signatures) {
+            foreach (var s in signatures) {
+                builder.Register((c, p) => getTransform(p.Positional<IContext>(0))).Named<ITransform>(s.Method);
+            }
         }
 
     }

@@ -40,14 +40,14 @@ namespace UnitTests {
                 <add number1='3' number2='3.0' text1='Three' text2='Three' />
             </rows>
             <fields>
-                <add name='number1' type='int' />
+                <add name='number1' type='int' primary-key='true' />
                 <add name='number2' type='double' />
                 <add name='text1' />
                 <add name='text2' />
             </fields>
             <calculated-fields>
-                <add name='added' type='double' t='cs(number1+number2)' />
-                <add name='joined' remote='true' t='cs(text1+text2)' />
+                <add name='added' type='double' t='cs(number1+number2)' remote='true'/>
+                <add name='joined' t='cs(text1+text2)' remote='true'/>
                 <add name='if' t='cs(
                     if(text1==""Two"" || text2==""Two"" || number1==2 || number2==2.0){{ 
                         return ""It is Two"";
@@ -63,26 +63,22 @@ namespace UnitTests {
                 using (var inner = new TestContainer().CreateScope(outer)) {
 
                     var process = inner.Resolve<Process>();
-                    var cf = process.Entities.First().CalculatedFields;
-
-                    var added = cf.First(f => f.Name == "added");
-                    var joined = cf.First(f => f.Name == "joined");
-                    var @if = cf.First(f => f.Name == "if");
-                    
+                  
                     var controller = inner.Resolve<IProcessController>();
-                    var rows = controller.Read().ToArray();
+                    controller.Execute();
+                    var rows = process.Entities.First().Rows;
 
-                    Assert.AreEqual(2.0, rows[0][added]);
-                    Assert.AreEqual(4.0, rows[1][added]);
-                    Assert.AreEqual(6.0, rows[2][added]);
+                    Assert.AreEqual(2.0, rows[0]["added"]);
+                    Assert.AreEqual(4.0, rows[1]["added"]);
+                    Assert.AreEqual(6.0, rows[2]["added"]);
 
-                    Assert.AreEqual("OneOne", rows[0][joined]);
-                    Assert.AreEqual("TwoTwo", rows[1][joined]);
-                    Assert.AreEqual("ThreeThree", rows[2][joined]);
+                    Assert.AreEqual("OneOne", rows[0]["joined"]);
+                    Assert.AreEqual("TwoTwo", rows[1]["joined"]);
+                    Assert.AreEqual("ThreeThree", rows[2]["joined"]);
 
-                    Assert.AreEqual("It is not Two", rows[0][@if]);
-                    Assert.AreEqual("It is Two", rows[1][@if]);
-                    Assert.AreEqual("It is not Two", rows[2][@if]);
+                    Assert.AreEqual("It is not Two", rows[0]["if"]);
+                    Assert.AreEqual("It is Two", rows[1]["if"]);
+                    Assert.AreEqual("It is not Two", rows[2]["if"]);
                 }
             }
 

@@ -16,11 +16,16 @@
 // limitations under the License.
 #endregion
 
+using System;
 using System.Collections.Generic;
 using Autofac;
 using Cfg.Net.Shorthand;
+using Transformalize;
 using Transformalize.Configuration;
+using Transformalize.Contracts;
+using Transformalize.Transforms;
 using Transformalize.Transforms.CsScript.Autofac;
+using Parameter = Cfg.Net.Shorthand.Parameter;
 
 namespace UnitTests {
     public class ConfigurationContainer {
@@ -34,11 +39,38 @@ namespace UnitTests {
             builder.Properties["Methods"] = _methods;
 
             builder.RegisterModule(new CsScriptModule());
+            RegisterShortHand(new[] { new OperationSignature("hashcode") });
             builder.Register((c, p) => _shortHand).As<ShorthandRoot>().InstancePerLifetimeScope();
 
-            builder.Register(ctx=> new Process(cfg, new ShorthandCustomizer(ctx.Resolve<ShorthandRoot>(), new[] {"fields", "calculated-fields"}, "t", "transforms", "method"))).As<Process>().InstancePerDependency();  // because it has state, if you run it again, it's not so good
+            builder.Register(ctx => new Process(cfg, new ShorthandCustomizer(ctx.Resolve<ShorthandRoot>(), new[] { "fields", "calculated-fields" }, "t", "transforms", "method"))).As<Process>().InstancePerDependency();  // because it has state, if you run it again, it's not so good
             return builder.Build().BeginLifetimeScope();
         }
+
+        private void RegisterShortHand(IEnumerable<OperationSignature> signatures) {
+
+            foreach (var s in signatures) {
+                if (!_methods.Add(s.Method)) {
+                    continue;
+                }
+
+                var method = new Method { Name = s.Method, Signature = s.Method, Ignore = s.Ignore };
+                _shortHand.Methods.Add(method);
+
+                var signature = new Signature {
+                    Name = s.Method,
+                    NamedParameterIndicator = s.NamedParameterIndicator
+                };
+
+                foreach (var parameter in s.Parameters) {
+                    signature.Parameters.Add(new Parameter {
+                        Name = parameter.Name,
+                        Value = parameter.Value
+                    });
+                }
+                _shortHand.Signatures.Add(signature);
+            }
+        }
+
     }
 
 }

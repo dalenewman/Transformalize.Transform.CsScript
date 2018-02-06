@@ -27,7 +27,7 @@ Use like this:
 </cfg>
 ```
 
-This would produce `Something Wonderful 2`
+This produces `SomethingWonderful 2`
 
 Note: You can set a `remote` attribute on the field to `true` if you want to avoid memory leaks associated 
 with running dyanamically loaded c# assemblies into the host's `AppDomain`.
