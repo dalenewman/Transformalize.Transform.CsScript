@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using CSScriptLibrary;
 using Transformalize.Contracts;
@@ -33,8 +34,11 @@ namespace Transformalize.Transforms.CsScript {
             }
 
             try {
+                Context.Warn("Compiling and caching remote code");
                 _remote = CSScript.Evaluator.CreateDelegateRemotely<object>(code);
+                
                 RemoteCache[code] = _remote;
+
             } catch (Exception e) {
                 Run = false;
                 Context.Error(e.Message);

@@ -49,9 +49,11 @@ namespace Transformalize.Transforms.CsScript {
             if (LocalCache.ContainsKey(code) && LocalCache[code] != null) {
                 _local = LocalCache[code];
                 Context.Warn("Using cached local code");
+                return;
             }
 
             try {
+                Context.Warn("Compiling and caching local code");
                 _local = CSScript.Evaluator.LoadCode<ICode>(code);
                 LocalCache[code] = _local;
             } catch (Exception e) {

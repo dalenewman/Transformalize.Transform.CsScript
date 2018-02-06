@@ -22,14 +22,12 @@ namespace Transformalize.Transforms.CsScript.Autofac {
             var signatures = new CodeLocal().GetSignatures().ToArray();
 
             if (!_setup) {
+                AppDomain.MonitoringIsEnabled = true;
                 CSScript.EvaluatorConfig.Access = EvaluatorAccess.Singleton;
                 CSScript.EvaluatorConfig.Engine = EvaluatorEngine.CodeDom;
-                CSScript.EvaluatorConfig.RefernceDomainAsemblies = true;
                 CSScript.GlobalSettings.SearchDirs = AssemblyDirectory + ";" + Path.Combine(AssemblyDirectory, "plugins");
-                CSScript.AssemblyResolvingEnabled = true;
                 CSScript.CacheEnabled = true;
                 CSSEnvironment.SetScriptTempDir(Path.Combine(AssemblyDirectory, "plugins", "cs-script"));
-
                 _setup = true;
             }
 
@@ -39,14 +37,21 @@ namespace Transformalize.Transforms.CsScript.Autofac {
 
             RegisterShortHand(signatures);
             RegisterTransform(builder, c => c.Field.Remote ? (ITransform)new CodeRemote(c) : new CodeLocal(c), signatures);
-            var action = new Configuration.Action { Type = "cs-script", Before = false, After = true, Key = "cs-script" };
 
-            builder.Register<IAction>((c) => new RemoteUnload(action)).Named<IAction>("cs-script");
+            if (!builder.Properties.ContainsKey("Process"))
+                return;
 
-            if (builder.Properties.ContainsKey("Process")) {
-                var process = (Process)builder.Properties["Process"];
+            var process = (Process)builder.Properties["Process"];
+            if (process == null)
+                return;
+            
+            if (process.Entities.Any() && process.GetAllTransforms().Any(t => t.Method == "cs" || t.Method == "csharp")) {
+                var action = new Configuration.Action { Type = "cs-script", Before = false, After = true, Key = "cs-script" };
+                builder.Register<IAction>((c) => new RemoteUnload(c.Resolve<IContext>(), action)).Named<IAction>("cs-script");
                 process.Actions.Add(action);
             }
+
+
         }
 
 
