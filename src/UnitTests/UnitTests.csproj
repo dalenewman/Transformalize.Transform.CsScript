@@ -67,16 +67,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigurationContainer.cs" />
     <Compile Include="Test.cs" />
-    <Compile Include="TestContainer.cs" />
-    <Compile Include="TransformFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BootStrapper\BootStrapper.csproj">
+      <Project>{4d7acea9-6e0a-4174-9551-894b0124357a}</Project>
+      <Name>BootStrapper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Transformalize.Transform.CsScript.Autofac\Transformalize.Transform.CsScript.Autofac.csproj">
       <Project>{cd3477b9-14e5-4ea3-90b0-ca9299bcae73}</Project>
       <Name>Transformalize.Transform.CsScript.Autofac</Name>
