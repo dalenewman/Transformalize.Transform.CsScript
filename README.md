@@ -1,6 +1,6 @@
 ### Overview
 
-This adds C# transform to Transformalize using [CS-Script](https://github.com/oleg-shilo/cs-script).  It is a plug-in compatible with Transformalize 0.3.2-beta.
+This adds C# transform to Transformalize using [CS-Script](https://github.com/oleg-shilo/cs-script).  It is a plug-in compatible with Transformalize 0.3.6-beta.
 
 Build the Autofac project and put it's output into Transformalize's *plugins* folder.
 
@@ -18,7 +18,7 @@ Build the Autofac project and put it's output into Transformalize's *plugins* fo
                 <add name="number" type="int" />
             </fields>
             <calculated-fields>
-                <add name="csharped" t='cs(return text + " " + number;)' />
+                <add name="csharped" t='csscript(return text + " " + number;)' />
             </calculated-fields>
         </add>
     </entities>
@@ -36,22 +36,22 @@ remotely is only half as fast as running it in-process.
 
 ``` ini
 
-BenchmarkDotNet=v0.10.12, OS=Windows 10 Redstone 3 [1709, Fall Creators Update] (10.0.16299.125)
-Intel Core i7-7700HQ CPU 2.80GHz (Kaby Lake), 1 CPU, 8 logical cores and 4 physical cores
-Frequency=2742192 Hz, Resolution=364.6718 ns, Timer=TSC
-  [Host]       : .NET Framework 4.6.2 (CLR 4.0.30319.42000), 32bit LegacyJIT-v4.7.2600.0
-  LegacyJitX64 : .NET Framework 4.6.2 (CLR 4.0.30319.42000), 64bit LegacyJIT/clrjit-v4.7.2600.0;compatjit-v4.7.2600.0
-  LegacyJitX86 : .NET Framework 4.6.2 (CLR 4.0.30319.42000), 32bit LegacyJIT-v4.7.2600.0
+BenchmarkDotNet=v0.11.1, OS=Windows 10.0.16299.251 (1709/FallCreatorsUpdate/Redstone3)
+Intel Core i7-7700HQ CPU 2.80GHz (Kaby Lake), 1 CPU, 8 logical and 4 physical cores
+Frequency=2742188 Hz, Resolution=364.6723 ns, Timer=TSC
+  [Host]       : .NET Framework 4.7.1 (CLR 4.0.30319.42000), 32bit LegacyJIT-v4.7.2633.0  [AttachedDebugger]
+  LegacyJitX64 : .NET Framework 4.7.1 (CLR 4.0.30319.42000), 64bit LegacyJIT/clrjit-v4.7.2633.0;compatjit-v4.7.2633.0
+  LegacyJitX86 : .NET Framework 4.7.1 (CLR 4.0.30319.42000), 32bit LegacyJIT-v4.7.2633.0
 
 Jit=LegacyJit  Runtime=Clr  
 
 ```
-|                        Method |          Job | Platform |      Mean |     Error |    StdDev | Scaled | ScaledSD |
-|------------------------------ |------------- |--------- |----------:|----------:|----------:|-------:|---------:|
-|               &#39;500 test rows&#39; | LegacyJitX64 |      X64 |  65.20 ms | 0.3868 ms | 0.3619 ms |   1.00 |     0.00 |
-| &#39;500 local csharp transforms&#39; | LegacyJitX64 |      X64 |  73.45 ms | 0.7392 ms | 0.6915 ms |   1.13 |     0.01 |
-| &#39;500 remote csharp transforms&#39; | LegacyJitX64 |      X64 | 134.13 ms | 0.8207 ms | 0.7677 ms |   2.06 |     0.02 |
-|                               |              |          |           |           |           |        |          |
-|               &#39;500 test rows&#39; | LegacyJitX86 |      X86 |  70.14 ms | 0.2699 ms | 0.2525 ms |   1.00 |     0.00 |
-| &#39;500 local csharp transforms&#39; | LegacyJitX86 |      X86 |  73.44 ms | 0.6242 ms | 0.5839 ms |   1.05 |     0.01 |
-| &#39;500 remote csharp transforms&#39; | LegacyJitX86 |      X86 | 131.84 ms | 0.5281 ms | 0.4682 ms |   1.88 |     0.01 |
+|                 Method |          Job | Platform |     Mean |     Error |    StdDev | Scaled | ScaledSD |
+|----------------------- |------------- |--------- |---------:|----------:|----------:|-------:|---------:|
+|       &#39;5000 test rows&#39; | LegacyJitX64 |      X64 | 468.0 ms |  5.057 ms |  4.483 ms |   1.00 |     0.00 |
+|  &#39;5000 1 local csharp&#39; | LegacyJitX64 |      X64 | 478.3 ms |  5.347 ms |  5.001 ms |   1.02 |     0.01 |
+| &#39;5000 1 remote csharp&#39; | LegacyJitX64 |      X64 | 747.4 ms |  5.559 ms |  4.928 ms |   1.60 |     0.02 |
+|                        |              |          |          |           |           |        |          |
+|       &#39;5000 test rows&#39; | LegacyJitX86 |      X86 | 513.8 ms | 12.960 ms | 12.123 ms |   1.00 |     0.00 |
+|  &#39;5000 1 local csharp&#39; | LegacyJitX86 |      X86 | 515.9 ms |  4.151 ms |  3.883 ms |   1.00 |     0.02 |
+| &#39;5000 1 remote csharp&#39; | LegacyJitX86 |      X86 | 789.3 ms |  8.761 ms |  7.767 ms |   1.54 |     0.04 |

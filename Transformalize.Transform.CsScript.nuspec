@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Transformalize.Transform.CsScript</id>
-    <version>0.3.0-beta</version>
+    <version>0.3.6-beta</version>
     <title>Transformalize Transform using CsScript</title>
     <authors>Dale Newman</authors>
     <owners>Dale Newman</owners>
@@ -15,7 +15,7 @@
     <tags>etl</tags>
     <dependencies>
       <group targetFramework="net452">
-        <dependency id="Transformalize" version="0.3.0-beta" />
+        <dependency id="Transformalize" version="0.3.6-beta" />
         <dependency id="CS-Script" version="3.27.2" />
       </group>
     </dependencies>

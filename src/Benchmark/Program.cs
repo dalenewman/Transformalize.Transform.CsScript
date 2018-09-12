@@ -1,10 +1,12 @@
-﻿using Autofac;
-using BootStrapper;
-using Transformalize.Contracts;
+﻿using System;
+using Autofac;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Attributes.Jobs;
 using BenchmarkDotNet.Running;
+using Transformalize.Contracts;
+using Transformalize.Containers.Autofac;
 using Transformalize.Logging;
+using Transformalize.Providers.Bogus.Autofac;
+using Transformalize.Transforms.CsScript.Autofac;
 
 namespace Benchmark {
 
@@ -12,30 +14,30 @@ namespace Benchmark {
     [LegacyJitX64Job, LegacyJitX86Job]
     public class Benchmarks {
 
-        [Benchmark(Baseline = true, Description = "500 test rows")]
+        [Benchmark(Baseline = true, Description = "5000 test rows")]
         public void TestRows() {
-            using (var outer = new ConfigurationContainer().CreateScope(@"files\bogus.xml?Size=500")) {
-                using (var inner = new TestContainer().CreateScope(outer, new NullLogger())) {
+            using (var outer = new ConfigurationContainer(new CsScriptModule()).CreateScope(@"files\bogus.xml?Size=5000")) {
+                using (var inner = new TestContainer(new CsScriptModule(), new BogusModule()).CreateScope(outer, new NullLogger())) {
                     var controller = inner.Resolve<IProcessController>();
                     controller.Execute();
                 }
             }
         }
 
-        [Benchmark(Baseline = false, Description = "500 local csharp transforms")]
+        [Benchmark(Baseline = false, Description = "5000 1 local csharp")]
         public void CSharpRows() {
-            using (var outer = new ConfigurationContainer().CreateScope(@"files\bogus-csharp.xml?Size=500")) {
-                using (var inner = new TestContainer().CreateScope(outer, new NullLogger())) {
+            using (var outer = new ConfigurationContainer(new CsScriptModule()).CreateScope(@"files\bogus-csharp.xml?Size=5000")) {
+                using (var inner = new TestContainer(new CsScriptModule(), new BogusModule()).CreateScope(outer, new NullLogger())) {
                     var controller = inner.Resolve<IProcessController>();
                     controller.Execute();
                 }
             }
         }
 
-        [Benchmark(Baseline = false, Description = "500 remote csharp transforms")]
+        [Benchmark(Baseline = false, Description = "5000 1 remote csharp")]
         public void CSharpRemoteRows() {
-            using (var outer = new ConfigurationContainer().CreateScope(@"files\bogus-csharp.xml?Size=500&Remote=true")) {
-                using (var inner = new TestContainer().CreateScope(outer, new NullLogger())) {
+            using (var outer = new ConfigurationContainer(new CsScriptModule()).CreateScope(@"files\bogus-csharp.xml?Size=5000&Remote=true")) {
+                using (var inner = new TestContainer(new CsScriptModule(), new BogusModule()).CreateScope(outer, new NullLogger())) {
                     var controller = inner.Resolve<IProcessController>();
                     controller.Execute();
                 }
@@ -46,6 +48,7 @@ namespace Benchmark {
     public class Program {
         private static void Main(string[] args) {
             var summary = BenchmarkRunner.Run<Benchmarks>();
+            Console.WriteLine(summary);
         }
     }
 }

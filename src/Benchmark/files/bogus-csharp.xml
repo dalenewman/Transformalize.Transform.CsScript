@@ -14,16 +14,8 @@
         <add name='Stars' type='byte' min='1' max='5' />
         <add name='Reviewers' type='int' min='0' max='500' />
       </fields>
-
       <calculated-fields>
-        <add name='Score' type='int' t='cs(Stars * Reviewers)' remote='@[Remote]' />
-        <add name='FullName' t='cs(return FirstName + " " + LastName;)' remote='@[Remote]' />
-        <add name='Condition' remote='@[Remote]' t='cs(
-                if(Stars==5){{ 
-                    return "5 Star";
-                }} else {{ 
-                    return string.Empty;
-                }})' />
+        <add name='Score' type='int' t='csscript(Stars * Reviewers)' remote='@[Remote]' />
       </calculated-fields>
     </add>
   </entities>

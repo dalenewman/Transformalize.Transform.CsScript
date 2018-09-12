@@ -63,10 +63,7 @@ namespace Transformalize.Transforms.CsScript {
 
         public override IEnumerable<OperationSignature> GetSignatures() {
             return new[] {
-                new OperationSignature("cs") {
-                    Parameters = new List<OperationParameter> { new OperationParameter("script") }
-                },
-                new OperationSignature("csharp") {
+                new OperationSignature("csscript") {
                     Parameters = new List<OperationParameter> { new OperationParameter("script") }
                 }
             };

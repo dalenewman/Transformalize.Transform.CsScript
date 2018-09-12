@@ -18,11 +18,12 @@
 
 using System.Linq;
 using Autofac;
-using BootStrapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Transformalize.Configuration;
+using Transformalize.Containers.Autofac;
 using Transformalize.Contracts;
 using Transformalize.Providers.Console;
+using Transformalize.Transforms.CsScript.Autofac;
 
 namespace UnitTests {
 
@@ -48,9 +49,9 @@ namespace UnitTests {
                 <add name='text2' />
             </fields>
             <calculated-fields>
-                <add name='added' type='double' t='cs(number1+number2)' remote='true'/>
-                <add name='joined' t='cs(text1+text2)' remote='true'/>
-                <add name='if' t='cs(
+                <add name='added' type='double' t='csscript(number1+number2)' remote='true'/>
+                <add name='joined' t='csscript(text1+text2)' remote='true'/>
+                <add name='if' t='csscript(
                     if(text1==""Two"" || text2==""Two"" || number1==2 || number2==2.0){{ 
                         return ""It is Two"";
                     }} else {{ 
@@ -61,8 +62,8 @@ namespace UnitTests {
     </entities>
 
 </add>";
-            using (var outer = new ConfigurationContainer().CreateScope(xml)) {
-                using (var inner = new TestContainer().CreateScope(outer, new ConsoleLogger(LogLevel.Debug))) {
+            using (var outer = new ConfigurationContainer(new CsScriptModule()).CreateScope(xml)) {
+                using (var inner = new TestContainer(new CsScriptModule()).CreateScope(outer, new ConsoleLogger(LogLevel.Debug))) {
 
                     var process = inner.Resolve<Process>();
                   
