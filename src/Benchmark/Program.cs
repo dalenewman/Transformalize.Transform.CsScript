@@ -9,7 +9,6 @@ using Transformalize.Providers.Bogus.Autofac;
 using Transformalize.Transforms.CsScript.Autofac;
 
 namespace Benchmark {
-
     
     [LegacyJitX64Job, LegacyJitX86Job]
     public class Benchmarks {

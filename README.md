@@ -48,10 +48,10 @@ Jit=LegacyJit  Runtime=Clr
 ```
 |                 Method |          Job | Platform |     Mean |     Error |    StdDev | Scaled | ScaledSD |
 |----------------------- |------------- |--------- |---------:|----------:|----------:|-------:|---------:|
-|       &#39;5000 test rows&#39; | LegacyJitX64 |      X64 | 468.0 ms |  5.057 ms |  4.483 ms |   1.00 |     0.00 |
-|  &#39;5000 1 local csharp&#39; | LegacyJitX64 |      X64 | 478.3 ms |  5.347 ms |  5.001 ms |   1.02 |     0.01 |
-| &#39;5000 1 remote csharp&#39; | LegacyJitX64 |      X64 | 747.4 ms |  5.559 ms |  4.928 ms |   1.60 |     0.02 |
+|       &#39;5000 test rows&#39; | LegacyJitX64 |      X64 | 522.6 ms |  9.774 ms |  9.142 ms |   1.00 |     0.00 |
+|  &#39;5000 1 local csharp&#39; | LegacyJitX64 |      X64 | 535.3 ms | 10.448 ms | 18.840 ms |   1.02 |     0.04 |
+| &#39;5000 1 remote csharp&#39; | LegacyJitX64 |      X64 | 828.1 ms | 16.174 ms | 23.707 ms |   1.58 |     0.05 |
 |                        |              |          |          |           |           |        |          |
-|       &#39;5000 test rows&#39; | LegacyJitX86 |      X86 | 513.8 ms | 12.960 ms | 12.123 ms |   1.00 |     0.00 |
-|  &#39;5000 1 local csharp&#39; | LegacyJitX86 |      X86 | 515.9 ms |  4.151 ms |  3.883 ms |   1.00 |     0.02 |
-| &#39;5000 1 remote csharp&#39; | LegacyJitX86 |      X86 | 789.3 ms |  8.761 ms |  7.767 ms |   1.54 |     0.04 |
+|       &#39;5000 test rows&#39; | LegacyJitX86 |      X86 | 547.1 ms |  6.538 ms |  5.795 ms |   1.00 |     0.00 |
+|  &#39;5000 1 local csharp&#39; | LegacyJitX86 |      X86 | 560.5 ms |  7.269 ms |  6.799 ms |   1.02 |     0.02 |
+| &#39;5000 1 remote csharp&#39; | LegacyJitX86 |      X86 | 902.6 ms | 17.958 ms | 33.286 ms |   1.65 |     0.06 |
