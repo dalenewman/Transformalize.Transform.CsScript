@@ -10,12 +10,12 @@ using Transformalize.Transforms.CsScript.Autofac;
 
 namespace Benchmark {
     
-    [LegacyJitX64Job, LegacyJitX86Job]
+    [LegacyJitX64Job]
     public class Benchmarks {
 
-        [Benchmark(Baseline = true, Description = "5000 test rows")]
+        [Benchmark(Baseline = true, Description = "10000 test rows")]
         public void TestRows() {
-            using (var outer = new ConfigurationContainer(new CsScriptModule()).CreateScope(@"files\bogus.xml?Size=5000")) {
+            using (var outer = new ConfigurationContainer(new CsScriptModule()).CreateScope(@"files\bogus.xml?Size=10000")) {
                 using (var inner = new TestContainer(new CsScriptModule(), new BogusModule()).CreateScope(outer, new NullLogger())) {
                     var controller = inner.Resolve<IProcessController>();
                     controller.Execute();
@@ -23,9 +23,9 @@ namespace Benchmark {
             }
         }
 
-        [Benchmark(Baseline = false, Description = "5000 1 local csharp")]
+        [Benchmark(Baseline = false, Description = "10000 1 local csharp")]
         public void CSharpRows() {
-            using (var outer = new ConfigurationContainer(new CsScriptModule()).CreateScope(@"files\bogus-csharp.xml?Size=5000")) {
+            using (var outer = new ConfigurationContainer(new CsScriptModule()).CreateScope(@"files\bogus-csharp.xml?Size=10000")) {
                 using (var inner = new TestContainer(new CsScriptModule(), new BogusModule()).CreateScope(outer, new NullLogger())) {
                     var controller = inner.Resolve<IProcessController>();
                     controller.Execute();
@@ -33,9 +33,9 @@ namespace Benchmark {
             }
         }
 
-        [Benchmark(Baseline = false, Description = "5000 1 remote csharp")]
+        [Benchmark(Baseline = false, Description = "10000 1 remote csharp")]
         public void CSharpRemoteRows() {
-            using (var outer = new ConfigurationContainer(new CsScriptModule()).CreateScope(@"files\bogus-csharp.xml?Size=5000&Remote=true")) {
+            using (var outer = new ConfigurationContainer(new CsScriptModule()).CreateScope(@"files\bogus-csharp.xml?Size=10000&Remote=true")) {
                 using (var inner = new TestContainer(new CsScriptModule(), new BogusModule()).CreateScope(outer, new NullLogger())) {
                     var controller = inner.Resolve<IProcessController>();
                     controller.Execute();

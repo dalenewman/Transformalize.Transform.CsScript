@@ -53,8 +53,6 @@ namespace Transformalize.Transforms.CsScript.Autofac {
 
 
         }
-
-
         private void RegisterShortHand(IEnumerable<OperationSignature> signatures) {
 
             foreach (var s in signatures) {
