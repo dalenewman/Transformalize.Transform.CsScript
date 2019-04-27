@@ -10,17 +10,17 @@
     <projectUrl>https://github.com/dalenewman/Transformalize.Transform.CsScript</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Transformalize Transform using CsScript Autofac Module</description>
-    <releaseNotes>initial release</releaseNotes>
-    <copyright>Copyright 2018</copyright>
+    <releaseNotes>updated to transformalize 0.6.x</releaseNotes>
+    <copyright>Copyright 2018-2019</copyright>
     <tags>etl</tags>
     <dependencies>
-      <group targetFramework="net452">
+      <group targetFramework="net462">
         <dependency id="Autofac" version="4.6.2" />
         <dependency id="Transformalize.Transform.CsScript" version="0.3.0-beta" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="src\Transformalize.Transform.CsScript.Autofac\bin\Release\Transformalize.Transform.CsScript.Autofac.dll" target="lib\net452\Transformalize.Transform.CsScript.Autofac.dll" />
+    <file src="src\Transformalize.Transform.CsScript.Autofac\bin\Release\Transformalize.Transform.CsScript.Autofac.dll" target="lib\net462\Transformalize.Transform.CsScript.Autofac.dll" />
   </files>
 </package>
