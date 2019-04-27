@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transformalize.Transform.CsScript", "src\Transformalize.Transform.CsScript\Transformalize.Transform.CsScript.csproj", "{4ED1E259-756A-40B8-9800-F563B59E0206}"
 EndProject
@@ -9,6 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transformalize.Transform.Cs
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C4563C88-9C80-4BD0-949E-AA64F111957E}"
 	ProjectSection(SolutionItems) = preProject
+		nuget.bat = nuget.bat
 		README.md = README.md
 		Transformalize.Transform.CsScript.Autofac.nuspec = Transformalize.Transform.CsScript.Autofac.nuspec
 		Transformalize.Transform.CsScript.nuspec = Transformalize.Transform.CsScript.nuspec
