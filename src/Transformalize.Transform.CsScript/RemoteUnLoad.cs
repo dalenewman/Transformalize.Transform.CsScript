@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CSScriptLibrary;
-using Transformalize.Actions;
 using Transformalize.Contracts;
 using Action = Transformalize.Configuration.Action;
 

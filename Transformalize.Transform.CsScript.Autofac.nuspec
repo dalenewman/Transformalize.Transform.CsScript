@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Transformalize.Transform.CsScript.Autofac</id>
-    <version>0.6.1-beta</version>
+    <version>0.6.2-beta</version>
     <title>Transformalize Transform using CsScript Autofac Module</title>
     <authors>Dale Newman</authors>
     <owners>Dale Newman</owners>
@@ -16,7 +16,7 @@
     <dependencies>
       <group targetFramework="net462">
         <dependency id="Autofac" version="4.6.2" />
-        <dependency id="Transformalize.Transform.CsScript" version="0.3.0-beta" />
+        <dependency id="Transformalize.Transform.CsScript" version="0.6.2-beta" />
       </group>
     </dependencies>
   </metadata>
