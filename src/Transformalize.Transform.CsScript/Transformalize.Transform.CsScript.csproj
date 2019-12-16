@@ -32,16 +32,19 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CfgNet, Version=0.10.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Cfg-NET.0.10.4\lib\net462\CfgNet.dll</HintPath>
+    <Reference Include="CfgNet, Version=0.11.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Cfg-NET.0.11.0\lib\net462\CfgNet.dll</HintPath>
     </Reference>
-    <Reference Include="CSScriptLibrary, Version=3.28.7.0, Culture=neutral, PublicKeyToken=70fcc3d18c749033, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\CS-Script.lib.3.28.7\lib\CSScriptLibrary.dll</HintPath>
+    <Reference Include="CSScriptLibrary, Version=3.30.0.0, Culture=neutral, PublicKeyToken=70fcc3d18c749033, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\CS-Script.lib.3.30.0\lib\CSScriptLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="DateMath, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DateMath.1.0.0\lib\net45\DateMath.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="Transformalize, Version=0.6.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Transformalize.0.6.1-beta\lib\net462\Transformalize.dll</HintPath>
+    <Reference Include="Transformalize, Version=0.6.20.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Transformalize.0.6.20-beta\lib\net462\Transformalize.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
